@@ -2,7 +2,7 @@ import "webcomponent-qr-code";
 import { getSha256 } from "./crypto";
 import { emojiList } from "./emojis.js";
 import { getChatResponse } from "./openai";
-import { playNothing, synthesizeSpeech } from "./speech";
+import { synthesizeSpeech } from "./speech";
 import { download, seed } from "./torrent.js";
 
 const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
@@ -15,8 +15,11 @@ const emojiInput = document.querySelector("#emoji");
 const promptInput = document.querySelector("#prompt");
 const messageTemplate = document.querySelector("#message-template");
 const buttonGroup = document.querySelector(".button-group");
+const audio = document.querySelector("audio");
 
 initThread();
+
+document.querySelector("body").addEventListener("pointerdown", playAudioOnce);
 
 continueButton.addEventListener("click", startSeed);
 
@@ -24,15 +27,14 @@ finishButton.addEventListener("click", async () => {
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
 
-  // HACK, use an empty sound to wake up the hardware.
-  playNothing();
+  shareContainer.textContent = "Piecing together the scenes...";
 
   const passcode = await passcodeAsync;
 
   const thread = getThread();
   const response = await getChatResponse(
     passcode,
-    "gpt-4o-mini",
+    "gpt-4o",
     [
       {
         role: "system",
@@ -48,6 +50,8 @@ finishButton.addEventListener("click", async () => {
       temperature: 0.75,
     }
   );
+
+  fadeoutAudio(0.1);
 
   shareContainer.textContent = response.choices[0].message.content;
   synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
@@ -89,7 +93,7 @@ async function startSeed() {
   const thread = getThread();
 
   const storyFile = new File([JSON.stringify(thread)], "story.json", { type: "application/json" });
-  const magnetURI = await seed(storyFile);
+  const magnetURI = await seed(storyFile, () => fadeoutAudio(0));
   const appURL = new URL(location.href);
   appURL.searchParams.set("thread", magnetURI);
 
@@ -112,4 +116,32 @@ function getThread() {
   ];
 
   return thread;
+}
+
+let wasPlayed = false;
+function playAudioOnce() {
+  if (!wasPlayed) {
+    audio.play();
+    audio.loop = true;
+    wasPlayed = true;
+  }
+
+  document.querySelector("body").removeEventListener("pointerdown", playAudioOnce);
+}
+
+let isFadingOut = false;
+function fadeoutAudio(min = 0) {
+  if (isFadingOut) {
+    return;
+  }
+
+  isFadingOut = true;
+  fadeoutAudioRecusive(min);
+}
+
+function fadeoutAudioRecusive(min) {
+  audio.volume = Math.max(min, audio.volume - 0.1);
+  if (audio.volume > min) {
+    setTimeout(() => fadeoutAudioRecusive(min), 100);
+  }
 }

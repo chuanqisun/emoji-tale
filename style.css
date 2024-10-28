@@ -23,6 +23,7 @@ body {
   margin: 16px auto;
   width: min(40rem, calc(100% - 2rem));
   display: grid;
+  font-size: 18px;
 
   > * {
     text-align: center;
@@ -136,4 +137,10 @@ qr-code::part(svg) {
   text-align: justify;
   text-wrap: pretty;
   font-size: 20px;
+}
+
+footer {
+  margin-top: 32px;
+  color: #636363;
+  text-align: start;
 }

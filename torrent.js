@@ -37,15 +37,22 @@ export function download(magnetURI, filename) {
 /**
  *
  * @param {File} file
+ * @param {(bytes: number) => void} onUploaded
  * @return {Promise<string>} magnetURI
  */
-export function seed(file) {
+export function seed(file, onUploaded) {
   const client = new WebTorrent({
     announce: ["udp://tracker.opentrackr.org:1337", "wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com", "wss://tracker.webtorrent.dev"],
   });
   return new Promise((resolve, _reject) => {
     client.seed(file, (torrent) => {
       console.log("Client is seeding:", torrent);
+
+      torrent.on("upload", onUploaded ?? (() => {}));
+
+      torrent.on("wire", (wire) => {
+        console.log("wire", wire);
+      });
 
       resolve(torrent.magnetURI);
     });
