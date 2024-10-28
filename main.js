@@ -19,7 +19,7 @@ const audio = document.querySelector("audio");
 
 initThread();
 
-document.querySelector("body").addEventListener("pointerdown", playAudioOnce);
+document.querySelector("body").addEventListener("click", playAudioOnce);
 
 continueButton.addEventListener("click", startSeed);
 
@@ -130,7 +130,7 @@ function playAudioOnce() {
     wasPlayed = true;
   }
 
-  document.querySelector("body").removeEventListener("pointerdown", playAudioOnce);
+  document.querySelector("body").removeEventListener("click", playAudioOnce);
 }
 
 let isFadingOut = false;
