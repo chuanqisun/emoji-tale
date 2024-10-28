@@ -1,0 +1,137 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: orange;
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 16px auto;
+  width: min(40rem, calc(100% - 2rem));
+  display: grid;
+
+  > * {
+    text-align: center;
+  }
+}
+
+h1 {
+  font-size: 4rem;
+  margin-block: 1rem;
+}
+
+.button-group {
+  display: grid;
+  grid-auto-columns: 1fr;
+  gap: 16px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.message-card {
+  display: grid;
+  gap: 16px;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #343434;
+}
+
+button {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 1rem;
+  border: none;
+  background: orange;
+  color: #242424;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.secondary {
+    border: 2px solid orange;
+    background-color: #242424;
+    color: orange;
+  }
+
+  &:active {
+    color: #242424;
+    background-color: white;
+    border-color: white;
+  }
+}
+
+.thread {
+  list-style: none;
+  display: grid;
+  padding: 0;
+  margin: 0;
+  gap: 32px;
+  counter-reset: scene-number;
+
+  li {
+    counter-increment: scene-number;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin: 0;
+    text-align: start;
+  }
+
+  .scene-name::before {
+    text-transform: uppercase;
+    color: #989898;
+    content: "Scene " counter(scene-number);
+  }
+}
+
+textarea {
+  font-family: inherit;
+  font-size: 18px;
+  background-color: #545454;
+  color: orange;
+  padding: 1rem;
+  width: 100%;
+
+  border-radius: 8px;
+  border: none;
+  resize: none;
+
+  &::placeholder {
+    color: #b9b9b9;
+  }
+
+  &:focus {
+    outline: 2px solid orange;
+    background-color: #242424;
+  }
+}
+
+[data-emoji] {
+  font-size: 6rem;
+}
+
+[data-new-message]:has([data-emoji]:empty) {
+  display: none;
+}
+
+qr-code::part(svg) {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}

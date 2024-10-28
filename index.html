@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <h1>Emoji Tale</h1>
+  <ol class="thread">
+    <li class="message-card" data-new-message>
+      <h2 class="scene-name"></h2>
+      <div data-emoji id="emoji"></div>
+      <textarea id="prompt" placeholder="Describe the scene..."></textarea>
+    </li>
+    <div class="button-group" hidden>
+      <button id="continue">Continue</button>
+      <button id="finish" class="secondary">Finish</button>
+    </div>
+    <div id="share-container"></div>
+  </ol>
+  <template id="message-template">
+    <li class="message-card">
+      <h2 class="scene-name"></h2>
+      <div data-emoji></div>
+      <p data-text></p>
+    </li>
+  </template>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
