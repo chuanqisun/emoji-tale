@@ -36,12 +36,11 @@ finishButton.addEventListener("click", async () => {
     [
       {
         role: "system",
-        content:
-          "Connect the scenes together into a coherent Halloween themed ghost story in one paragraph. Try to keep the scenes intact, no matter how ridiculous they are, and tell the story in your natural voice",
+        content: `Connect the scenes together into a Halloween themed ghost poem. One prose per secene. Keep the scene intact no matter how ridiculous they are, Read the poem in your poetic voice. No title.`,
       },
       {
         role: "user",
-        content: thread.map((item) => item.text).join(" "),
+        content: thread.map((item, index) => `Scene ${index + 1}: ${item.text}`).join("\n"),
       },
     ],
     {
@@ -50,6 +49,7 @@ finishButton.addEventListener("click", async () => {
     }
   );
 
+  shareContainer.textContent = response.choices[0].message.content;
   synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
 });
 

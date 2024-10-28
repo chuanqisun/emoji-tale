@@ -131,3 +131,9 @@ qr-code::part(svg) {
   height: auto;
   border-radius: 16px;
 }
+
+#share-container {
+  text-align: justify;
+  text-wrap: pretty;
+  font-size: 20px;
+}
