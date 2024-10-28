@@ -4,6 +4,7 @@ import { emojiList } from "./emojis.js";
 import { getChatResponse } from "./openai";
 import { synthesizeSpeech } from "./speech";
 import { download, seed } from "./torrent.js";
+import soundtrackUrl from "/alex-productions-freaky-halloween.mp3?url";
 
 const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
 
@@ -16,6 +17,7 @@ const promptInput = document.querySelector("#prompt");
 const messageTemplate = document.querySelector("#message-template");
 const buttonGroup = document.querySelector(".button-group");
 const audio = document.querySelector("audio");
+audio.src = soundtrackUrl;
 
 initThread();
 
