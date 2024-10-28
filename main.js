@@ -38,11 +38,13 @@ finishButton.addEventListener("click", async () => {
     [
       {
         role: "system",
-        content: `Connect the scenes together into a Halloween themed ghost poem. One prose per secene. Keep the scene intact no matter how ridiculous they are, Read the poem in your poetic voice. No title.`,
+        content: `Write a Halloween themed ghost poem based on provided scenes. One prose per secene. Keep the scene intact no matter how ridiculous they are, Read the poem in your poetic voice. No title.`,
       },
       {
         role: "user",
-        content: thread.map((item, index) => `Scene ${index + 1}: ${item.text.trim().length ? item.text : item.emoji}`).join("\n"),
+        content: thread
+          .map((item, index) => `Scene${thread.length > 1 ? ` ${index + 1}` : ""}: ${item.text.trim().length ? item.text : item.emoji}`)
+          .join("\n"),
       },
     ],
     {
@@ -51,7 +53,7 @@ finishButton.addEventListener("click", async () => {
     }
   );
 
-  fadeoutAudio(0.1);
+  fadeoutAudio(0.05);
 
   shareContainer.textContent = response.choices[0].message.content;
   synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
@@ -142,7 +144,7 @@ function fadeoutAudio(min = 0) {
 }
 
 function fadeoutAudioRecusive(min) {
-  audio.volume = Math.max(min, audio.volume - 0.1);
+  audio.volume = Math.max(min, audio.volume - 0.05);
   if (audio.volume > min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
   }
