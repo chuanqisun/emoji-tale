@@ -1,9 +1,8 @@
-import { concatMap } from "rxjs";
 import "webcomponent-qr-code";
 import { getSha256 } from "./crypto";
 import { emojiList } from "./emojis.js";
-import { getChatStream } from "./openai";
-import { createSentenceQueue, playNothing, synthesizeSpeech } from "./speech";
+import { getChatResponse } from "./openai";
+import { playNothing, synthesizeSpeech } from "./speech";
 import { download, seed } from "./torrent.js";
 
 const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
@@ -22,26 +21,36 @@ initThread();
 continueButton.addEventListener("click", startSeed);
 
 finishButton.addEventListener("click", async () => {
+  // reveal the story
+  document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
+
   // HACK, use an empty sound to wake up the hardware.
   playNothing();
 
   const passcode = await passcodeAsync;
 
-  const { sentenceQueue, enqueue, flush } = createSentenceQueue();
-  const stream = getChatStream(passcode, "gpt-4o-mini", [
+  const thread = getThread();
+  const response = await getChatResponse(
+    passcode,
+    "gpt-4o-mini",
+    [
+      {
+        role: "system",
+        content:
+          "Connect the scenes together into a coherent Halloween themed ghost story in one paragraph. Try to keep the scenes intact, no matter how ridiculous they are, and tell the story in your natural voice",
+      },
+      {
+        role: "user",
+        content: thread.map((item) => item.text).join(" "),
+      },
+    ],
     {
-      role: "user",
-      content: "Hello!",
-    },
-  ]);
+      max_tokens: 4_000,
+      temperature: 0.75,
+    }
+  );
 
-  sentenceQueue.pipe(concatMap((sentence) => synthesizeSpeech(passcode, sentence))).subscribe();
-
-  for await (const message of stream) {
-    const delta = message.choices.at(0)?.delta.content ?? "";
-    if (delta) enqueue(delta);
-  }
-  flush();
+  synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
 });
 
 async function initThread() {
@@ -77,6 +86,20 @@ async function initThread() {
 }
 
 async function startSeed() {
+  const thread = getThread();
+
+  const storyFile = new File([JSON.stringify(thread)], "story.json", { type: "application/json" });
+  const magnetURI = await seed(storyFile);
+  const appURL = new URL(location.href);
+  appURL.searchParams.set("thread", magnetURI);
+
+  shareContainer.innerHTML = `
+  <qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code>
+  <a href="${appURL.href}">Continue with URL</a>
+  `;
+}
+
+function getThread() {
   const thread = [
     ...[...document.querySelectorAll("[data-previous-item]")].map((card) => ({
       emoji: card.querySelector("[data-emoji]").textContent,
@@ -88,13 +111,5 @@ async function startSeed() {
     },
   ];
 
-  const storyFile = new File([JSON.stringify(thread)], "story.json", { type: "application/json" });
-  const magnetURI = await seed(storyFile);
-  const appURL = new URL(location.href);
-  appURL.searchParams.set("thread", magnetURI);
-
-  shareContainer.innerHTML = `
-  <qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code>
-  <a href="${appURL.href}">Continue with URL</a>
-  `;
+  return thread;
 }

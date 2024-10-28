@@ -44,6 +44,55 @@ export type OpenAIChatResponse = {
   };
 };
 
+export async function getChatResponse(
+  passcode: string,
+  deploymentName: string,
+  messages: ChatMessage[],
+  config?: Partial<OpenAIChatPayload>
+): Promise<OpenAIChatResponse> {
+  const payload = {
+    messages,
+    temperature: 0.7,
+    top_p: 1,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+    max_tokens: 60,
+    stop: "",
+    ...config,
+  };
+
+  try {
+    const result: OpenAIChatResponse = await fetch(
+      `https://proto-api.azure-api.net/halloween/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`,
+      {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          "x-secret-ingredient": passcode,
+        },
+        body: JSON.stringify(payload),
+      }
+    ).then((res) => res.json());
+
+    console.log({
+      title: `Chat ${result.usage.total_tokens} tokens`,
+      messages: payload.messages,
+      response: result,
+      topChoice: result.choices[0]?.message?.content ?? "",
+      tokenUsage: result.usage.total_tokens,
+    });
+
+    return result;
+  } catch (e) {
+    console.error({
+      title: `Completion error`,
+      messages: payload.messages,
+      error: `${(e as Error).name} ${(e as Error).message}`,
+    });
+    throw e;
+  }
+}
+
 export interface ChatStreamItem {
   id: string;
   object: string;
