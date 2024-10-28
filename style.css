@@ -38,10 +38,6 @@ h1 {
   display: grid;
   grid-auto-columns: 1fr;
   gap: 16px;
-
-  &[hidden] {
-    display: none;
-  }
 }
 
 .message-card {
@@ -126,7 +122,7 @@ textarea {
   font-size: 6rem;
 }
 
-[data-new-message]:has([data-emoji]:empty) {
+[hidden] {
   display: none;
 }
 

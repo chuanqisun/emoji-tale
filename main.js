@@ -1,6 +1,12 @@
+import { concatMap } from "rxjs";
 import "webcomponent-qr-code";
+import { getSha256 } from "./crypto";
 import { emojiList } from "./emojis.js";
+import { getChatStream } from "./openai";
+import { createSentenceQueue, playNothing, synthesizeSpeech } from "./speech";
 import { download, seed } from "./torrent.js";
+
+const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
 
 const continueButton = document.querySelector("#continue");
 const finishButton = document.querySelector("#finish");
@@ -14,6 +20,29 @@ const buttonGroup = document.querySelector(".button-group");
 initThread();
 
 continueButton.addEventListener("click", startSeed);
+
+finishButton.addEventListener("click", async () => {
+  // HACK, use an empty sound to wake up the hardware.
+  playNothing();
+
+  const passcode = await passcodeAsync;
+
+  const { sentenceQueue, enqueue, flush } = createSentenceQueue();
+  const stream = getChatStream(passcode, "gpt-4o-mini", [
+    {
+      role: "user",
+      content: "Hello!",
+    },
+  ]);
+
+  sentenceQueue.pipe(concatMap((sentence) => synthesizeSpeech(passcode, sentence))).subscribe();
+
+  for await (const message of stream) {
+    const delta = message.choices.at(0)?.delta.content ?? "";
+    if (delta) enqueue(delta);
+  }
+  flush();
+});
 
 async function initThread() {
   const thread = new URLSearchParams(location.search).get("thread");
@@ -43,6 +72,7 @@ async function initThread() {
     newMessageCard.remove();
   }
 
+  newMessageCard.removeAttribute("hidden");
   buttonGroup.removeAttribute("hidden");
 }
 
