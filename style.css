@@ -143,4 +143,6 @@ footer {
   margin-top: 32px;
   color: #636363;
   text-align: start;
+
+  word-break: break-all;
 }

@@ -42,7 +42,7 @@ finishButton.addEventListener("click", async () => {
       },
       {
         role: "user",
-        content: thread.map((item, index) => `Scene ${index + 1}: ${item.text}`).join("\n"),
+        content: thread.map((item, index) => `Scene ${index + 1}: ${item.text.trim().length ? item.text : item.emoji}`).join("\n"),
       },
     ],
     {
@@ -90,6 +90,8 @@ async function initThread() {
 }
 
 async function startSeed() {
+  buttonGroup.remove();
+
   const thread = getThread();
 
   const storyFile = new File([JSON.stringify(thread)], "story.json", { type: "application/json" });
