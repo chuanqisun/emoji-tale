@@ -92,10 +92,12 @@ function handleStart() {
 async function handleFinishGame() {
   lockInChoice();
 
+  startButton.setAttribute("hidden", "");
+  finishButton.setAttribute("hidden", "");
+  resetButton.setAttribute("hidden", "");
+
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
-
-  buttonGroup.setAttribute("hidden", "");
 
   shareContainer.textContent = "Piecing together the verses...";
 
@@ -108,7 +110,7 @@ async function handleFinishGame() {
     [
       {
         role: "system",
-        content: `Convert the emoji and text into a short Halloween themed ghost poem. Try to be funny, ridiculous, and creative. Make sure each line of emoji + text is converted to exactly one line of verse. No title.`,
+        content: `Convert the emoji and text into a short Halloween themed ghost poem. Try to be funny, ridiculous, and creative. Make sure each line of emoji + text is converted to exactly one line of verse. No title. No emoji in the final poem.`,
       },
       {
         role: "user",
@@ -122,6 +124,7 @@ async function handleFinishGame() {
   );
 
   resetButton.classList.remove("secondary");
+  resetButton.removeAttribute("hidden");
 
   fadeoutAudio(0.05);
 
@@ -196,6 +199,7 @@ function fadeoutAudioRecusive(min) {
 
 function lockInChoice() {
   document.querySelectorAll("[data-new-message] *:where(input, textarea)").forEach((input) => input.setAttribute("disabled", ""));
+  redactTextArea();
 }
 
 function redactTextArea() {
