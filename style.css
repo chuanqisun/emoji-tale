@@ -20,7 +20,7 @@
 }
 
 body {
-  margin: 16px auto;
+  margin: 16px auto 32px auto;
   width: min(40rem, calc(100% - 2rem));
   display: grid;
   font-size: 18px;
