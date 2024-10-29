@@ -105,10 +105,7 @@ async function startSeed() {
   const appURL = new URL(location.href);
   appURL.searchParams.set("thread", compressedThread);
 
-  shareContainer.innerHTML = `
-  <qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code>
-  <a href="${appURL.href}" data-share-by-url>Share by URL</a>
-  `;
+  shareContainer.innerHTML = `<a href="${appURL.href}" data-share-by-url><qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code></a>`;
 }
 
 function getThread() {
@@ -157,7 +154,7 @@ function fadeoutAudioRecusive(min) {
 function handleShareByURL(e) {
   if (typeof navigator.share === "function" && e.target?.closest("[data-share-by-url]")) {
     e.preventDefault();
-    const url = e.target.href;
+    const url = e.target.closest("[data-share-by-url]").href;
 
     navigator.share({
       title: "Poemoji",

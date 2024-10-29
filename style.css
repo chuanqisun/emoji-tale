@@ -151,6 +151,11 @@ qr-code::part(svg) {
   text-wrap: pretty;
   white-space: pre-wrap;
   font-size: 24px;
+
+  a {
+    display: block;
+    text-decoration: none;
+  }
 }
 
 footer {
