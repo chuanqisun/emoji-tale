@@ -75,11 +75,12 @@ async function initThread() {
 
 function getRandomEmojis(count) {
   const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
-  const unusedEmojis = emojiList.filter((emoji) => !usedEmojis.has(emoji));
-  const availableEmojis = unusedEmojis.slice(0, count);
-  const shuffledEmojis = availableEmojis.sort(() => Math.random() - 0.5);
+  const unusedEmojis = emojiList
+    .filter((emoji) => !usedEmojis.has(emoji))
+    .sort(() => Math.random() - 0.5)
+    .slice(0, count);
 
-  return shuffledEmojis;
+  return unusedEmojis;
 }
 
 function handleStart() {
@@ -93,6 +94,7 @@ async function handleFinishGame() {
   lockInChoice();
 
   startButton.setAttribute("hidden", "");
+  handoffButton.setAttribute("hidden", "");
   finishButton.setAttribute("hidden", "");
   resetButton.setAttribute("hidden", "");
 
