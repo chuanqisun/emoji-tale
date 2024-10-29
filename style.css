@@ -30,38 +30,6 @@ body {
   }
 }
 
-p {
-  text-align: justify;
-  text-wrap: pretty;
-  color: #b9b9b9;
-}
-
-h1 {
-  font-family: scary, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
-    sans-serif;
-  font-size: 6rem;
-  margin-block: 1rem;
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-}
-
-.button-group {
-  display: grid;
-  grid-auto-columns: 1fr;
-  gap: 16px;
-}
-
-.message-card {
-  display: grid;
-  gap: 16px;
-  border-radius: 8px;
-  padding: 16px;
-  background-color: #343434;
-}
-
 button {
   font-size: 24px;
   font-weight: bold;
@@ -85,6 +53,67 @@ button {
   }
 }
 
+p {
+  text-align: justify;
+  text-wrap: pretty;
+  color: #b9b9b9;
+}
+
+h1 {
+  font-family: scary, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
+    sans-serif;
+  font-size: 6rem;
+  margin-block: 1rem;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+qr-code::part(svg) {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+
+.button-group {
+  display: grid;
+  grid-auto-columns: 1fr;
+  gap: 16px;
+}
+
+.emoji-choice {
+  & {
+    cursor: pointer;
+    display: inline-flex;
+    border-radius: 16px;
+    border: 2px solid transparent;
+  }
+
+  &:has(input:checked) {
+    background-color: #242424;
+    border-color: orange;
+  }
+}
+
+.emoji-grid {
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  place-content: center;
+  place-items: center;
+}
+
+.message-card {
+  display: grid;
+  gap: 16px;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #343434;
+}
+
 .thread {
   list-style: none;
   display: grid;
@@ -100,7 +129,6 @@ button {
   h2 {
     font-size: 24px;
     margin: 0;
-    text-align: start;
   }
 
   .scene-name::before {
@@ -108,6 +136,15 @@ button {
     color: #989898;
     content: "Verse " counter(scene-number);
   }
+}
+
+footer {
+  margin-top: 32px;
+  font-size: 16px;
+  color: #636363;
+  text-align: start;
+
+  word-break: break-all;
 }
 
 textarea {
@@ -132,20 +169,6 @@ textarea {
   }
 }
 
-[data-emoji] {
-  font-size: 6rem;
-}
-
-[hidden] {
-  display: none;
-}
-
-qr-code::part(svg) {
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-}
-
 #share-container {
   text-align: center;
   text-wrap: pretty;
@@ -158,16 +181,25 @@ qr-code::part(svg) {
   }
 }
 
-footer {
-  margin-top: 32px;
-  font-size: 16px;
-  color: #636363;
-  text-align: start;
-
-  word-break: break-all;
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 @font-face {
   font-family: "scary";
   src: url("/ZombieHolocaust.woff2");
+}
+
+[data-emoji] {
+  font-size: 6rem;
+}
+
+[hidden] {
+  display: none;
 }

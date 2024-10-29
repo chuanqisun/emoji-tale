@@ -19,6 +19,7 @@ const messageTemplate = document.querySelector("#message-template");
 const buttonGroup = document.querySelector(".button-group");
 const audio = document.querySelector("audio");
 const startButton = document.querySelector("#start");
+const resetButton = document.querySelector("#reset");
 audio.src = soundtrackUrl;
 
 initThread();
@@ -29,12 +30,15 @@ appName.addEventListener("click", resetGame);
 
 startButton.addEventListener("click", handleStart);
 continueButton.addEventListener("click", startSeed);
+resetButton.addEventListener("click", resetGame);
 
 shareContainer.addEventListener("click", handleShareByURL);
 
 finishButton.addEventListener("click", async () => {
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
+
+  buttonGroup.setAttribute("hidden", "");
 
   shareContainer.textContent = "Piecing together the verses...";
 
@@ -51,7 +55,7 @@ finishButton.addEventListener("click", async () => {
       },
       {
         role: "user",
-        content: thread.map((item, index) => `Line ${index + 1}: ${item.emoji} ${item.text}`).join("\n"),
+        content: thread.map((item, index) => `Line${thread.length > 1 ? ` ${index + 1}` : ""}: ${item.emoji} ${item.text}`).join("\n"),
       },
     ],
     {
@@ -59,6 +63,8 @@ finishButton.addEventListener("click", async () => {
       temperature: 0.75,
     }
   );
+
+  resetButton.removeAttribute("hidden");
 
   fadeoutAudio(0.05);
 
@@ -87,10 +93,16 @@ async function initThread() {
     finishButton.setAttribute("hidden", "");
   }
 
-  const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
-  const unusedEmojis = emojiList.filter((emoji) => !usedEmojis.has(emoji));
-  if (unusedEmojis.length) {
-    emojiInput.textContent = unusedEmojis[Math.floor(Math.random() * unusedEmojis.length)];
+  const randomEmojis = getRandomEmojis(4);
+  if (randomEmojis.length) {
+    emojiInput.innerHTML = randomEmojis
+      .map(
+        (emoji, i) =>
+          `<label data-emoji class="emoji-choice"><input type="radio" name="selectedEmoji" class="visually-hidden" value="${emoji}" ${
+            i === 0 ? "checked" : ""
+          } />${emoji}</label>`
+      )
+      .join("");
   } else {
     continueButton.remove();
     finishButton.classList.remove("secondary");
@@ -98,6 +110,15 @@ async function initThread() {
   }
 
   buttonGroup.removeAttribute("hidden");
+}
+
+function getRandomEmojis(count) {
+  const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
+  const unusedEmojis = emojiList.filter((emoji) => !usedEmojis.has(emoji));
+  const availableEmojis = unusedEmojis.slice(0, count);
+  const shuffledEmojis = availableEmojis.sort(() => Math.random() - 0.5);
+
+  return shuffledEmojis;
 }
 
 function handleStart() {
@@ -131,7 +152,7 @@ function getThread() {
       ? []
       : [
           {
-            emoji: emojiInput.textContent,
+            emoji: emojiInput.querySelector("input:checked").value,
             text: promptInput.value,
           },
         ]),

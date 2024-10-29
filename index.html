@@ -14,12 +14,12 @@
   <h1>
     <a href="./">poemoji</a>
   </h1>
-  <p><b>How to play:</b> Write a spooky caption for the emoji, then pass the game to the next player via QR
-    code. If you are the last player, wrap up to hear a unique ghost story in the most poetic form.</p>
+  <p><b>How to play:</b> Choose an emoji and add a spooky caption. Pass the game to the next player via QR
+    code until all players are finished. You will hear a poetic ghost story when you wrap up.</p>
   <ol class="thread">
     <li class="message-card" data-new-message hidden>
       <h2 class="scene-name"></h2>
-      <div data-emoji id="emoji"></div>
+      <div id="emoji" class="emoji-grid"></div>
       <textarea id="prompt" placeholder="Add a spooky caption... (optional)"></textarea>
     </li>
     <div class="button-group" hidden>
@@ -28,6 +28,7 @@
       <button id="finish" class="secondary">WRAP UP</button>
     </div>
     <div id="share-container"></div>
+    <button id="reset" hidden>NEW GAME</button>
   </ol>
   <template id="message-template">
     <li class="message-card">
