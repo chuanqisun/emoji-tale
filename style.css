@@ -30,6 +30,12 @@ body {
   }
 }
 
+p {
+  text-align: justify;
+  text-wrap: pretty;
+  color: #b9b9b9;
+}
+
 h1 {
   font-family: scary, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
     sans-serif;
@@ -100,7 +106,7 @@ button {
   .scene-name::before {
     text-transform: uppercase;
     color: #989898;
-    content: "Scene " counter(scene-number);
+    content: "Verse " counter(scene-number);
   }
 }
 
@@ -141,9 +147,10 @@ qr-code::part(svg) {
 }
 
 #share-container {
-  text-align: justify;
+  text-align: center;
   text-wrap: pretty;
-  font-size: 20px;
+  white-space: pre-wrap;
+  font-size: 24px;
 }
 
 footer {

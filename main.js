@@ -43,13 +43,11 @@ finishButton.addEventListener("click", async () => {
     [
       {
         role: "system",
-        content: `Write a Halloween themed ghost poem based on provided scenes. One prose per secene. Keep the scene intact no matter how ridiculous they are, Read the poem in your poetic voice. No title.`,
+        content: `Convert the emoji and text into a short Halloween themed ghost poem. Try to be funny, ridiculous, and creative. Make sure each line of emoji + text is converted to exactly one line of verse. No title.`,
       },
       {
         role: "user",
-        content: thread
-          .map((item, index) => `Scene${thread.length > 1 ? ` ${index + 1}` : ""}: ${item.text.trim().length ? item.text : item.emoji}`)
-          .join("\n"),
+        content: thread.map((item, index) => `Line ${index + 1}: ${item.emoji} ${item.text}`).join("\n"),
       },
     ],
     {
