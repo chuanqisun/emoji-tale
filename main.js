@@ -192,6 +192,7 @@ function fadeoutAudio(min = 0) {
   if (isMobileDevice()) {
     audio.muted = true;
     audio.loop = false;
+    audio.pause();
   } else {
     fadeoutAudioRecusive(min);
   }
