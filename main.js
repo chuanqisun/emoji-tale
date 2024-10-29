@@ -1,13 +1,14 @@
 import "webcomponent-qr-code";
+import { compressText, decompressText } from "./compression.js";
 import { getSha256 } from "./crypto";
 import { emojiList } from "./emojis.js";
 import { getChatResponse } from "./openai";
 import { synthesizeSpeech } from "./speech";
-import { download, seed } from "./torrent.js";
 import soundtrackUrl from "/alex-productions-freaky-halloween.mp3?url";
 
 const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
 
+const appName = document.querySelector("h1 a");
 const continueButton = document.querySelector("#continue");
 const finishButton = document.querySelector("#finish");
 const newMessageCard = document.querySelector("[data-new-message]");
@@ -22,6 +23,8 @@ audio.src = soundtrackUrl;
 initThread();
 
 document.querySelector("body").addEventListener("click", playAudioOnce);
+
+appName.addEventListener("click", resetGame);
 
 continueButton.addEventListener("click", startSeed);
 
@@ -64,7 +67,7 @@ finishButton.addEventListener("click", async () => {
 async function initThread() {
   const thread = new URLSearchParams(location.search).get("thread");
   if (thread) {
-    const messages = JSON.parse(await download(thread, "story.json"));
+    const messages = JSON.parse(await decompressText(thread));
 
     const items = messages.map((message) => {
       const cloned = messageTemplate.content.cloneNode(true);
@@ -98,10 +101,9 @@ async function startSeed() {
 
   const thread = getThread();
 
-  const storyFile = new File([JSON.stringify(thread)], "story.json", { type: "application/json" });
-  const magnetURI = await seed(storyFile, () => fadeoutAudio(0));
+  const compressedThread = await compressText(JSON.stringify(thread));
   const appURL = new URL(location.href);
-  appURL.searchParams.set("thread", magnetURI);
+  appURL.searchParams.set("thread", compressedThread);
 
   shareContainer.innerHTML = `
   <qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code>
@@ -150,4 +152,16 @@ function fadeoutAudioRecusive(min) {
   if (audio.volume > min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
   }
+}
+
+/**
+ *
+ * @param {MouseEvent} e
+ */
+function resetGame(e) {
+  e.preventDefault();
+
+  const mutableUrl = new URL(location.href);
+  mutableUrl.searchParams.delete("thread");
+  location.href = mutableUrl.href;
 }

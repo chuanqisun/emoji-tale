@@ -31,8 +31,15 @@ body {
 }
 
 h1 {
-  font-size: 4rem;
+  font-family: scary, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
+    sans-serif;
+  font-size: 6rem;
   margin-block: 1rem;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .button-group {
@@ -141,8 +148,14 @@ qr-code::part(svg) {
 
 footer {
   margin-top: 32px;
+  font-size: 16px;
   color: #636363;
   text-align: start;
 
   word-break: break-all;
+}
+
+@font-face {
+  font-family: "scary";
+  src: url("/ZombieHolocaust.woff2");
 }
