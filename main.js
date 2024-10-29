@@ -193,11 +193,24 @@ function fadeoutAudio(min = 0) {
 }
 
 function fadeoutAudioRecusive(min) {
-  audio.volume = Math.max(min, audio.volume - 0.05);
+  const oldVolume = audio.volume;
+  const newVolume = Math.max(min, audio.volume - 0.05);
+  if (oldVolume === newVolume) return;
+
+  audio.volume = newVolume;
+
+  if (oldVolume === newVolume) {
+    // on iphone or android, audio.volume is controlled by user
+    audio.muted = true;
+    return;
+  }
+
   if (audio.volume > min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
   }
 }
+
+function isMobile() {}
 
 function lockInChoice() {
   document.querySelectorAll("[data-new-message] *:where(input, textarea)").forEach((input) => input.setAttribute("disabled", ""));
