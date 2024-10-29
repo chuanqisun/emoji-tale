@@ -18,6 +18,7 @@ const promptInput = document.querySelector("#prompt");
 const messageTemplate = document.querySelector("#message-template");
 const buttonGroup = document.querySelector(".button-group");
 const audio = document.querySelector("audio");
+const startButton = document.querySelector("#start");
 audio.src = soundtrackUrl;
 
 initThread();
@@ -26,6 +27,7 @@ document.querySelector("body").addEventListener("click", playAudioOnce);
 
 appName.addEventListener("click", resetGame);
 
+startButton.addEventListener("click", handleStart);
 continueButton.addEventListener("click", startSeed);
 
 shareContainer.addEventListener("click", handleShareByURL);
@@ -34,7 +36,7 @@ finishButton.addEventListener("click", async () => {
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
 
-  shareContainer.textContent = "Piecing together the scenes...";
+  shareContainer.textContent = "Piecing together the verses...";
 
   const passcode = await passcodeAsync;
 
@@ -68,6 +70,7 @@ async function initThread() {
   const thread = new URLSearchParams(location.search).get("thread");
   if (thread) {
     const messages = JSON.parse(await decompressText(thread));
+    startButton.textContent = "CONTINUE";
 
     const items = messages.map((message) => {
       const cloned = messageTemplate.content.cloneNode(true);
@@ -80,6 +83,8 @@ async function initThread() {
     });
 
     document.querySelector(".thread").prepend(...items);
+  } else {
+    finishButton.setAttribute("hidden", "");
   }
 
   const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
@@ -92,8 +97,14 @@ async function initThread() {
     newMessageCard.remove();
   }
 
-  newMessageCard.removeAttribute("hidden");
   buttonGroup.removeAttribute("hidden");
+}
+
+function handleStart() {
+  startButton.remove();
+  continueButton.removeAttribute("hidden");
+  finishButton.removeAttribute("hidden");
+  newMessageCard.removeAttribute("hidden");
 }
 
 async function startSeed() {
@@ -109,15 +120,21 @@ async function startSeed() {
 }
 
 function getThread() {
+  const isNewMessageHidden = newMessageCard.hasAttribute("hidden");
+
   const thread = [
     ...[...document.querySelectorAll("[data-previous-item]")].map((card) => ({
       emoji: card.querySelector("[data-emoji]").textContent,
       text: card.querySelector("[data-text]").getAttribute("data-text"),
     })),
-    {
-      emoji: emojiInput.textContent,
-      text: promptInput.value,
-    },
+    ...(isNewMessageHidden
+      ? []
+      : [
+          {
+            emoji: emojiInput.textContent,
+            text: promptInput.value,
+          },
+        ]),
   ];
 
   return thread;
@@ -152,6 +169,9 @@ function fadeoutAudioRecusive(min) {
 }
 
 function handleShareByURL(e) {
+  if (e.ctrlKey || e.metaKey || e.shiftKey) {
+    return;
+  }
   if (typeof navigator.share === "function" && e.target?.closest("[data-share-by-url]")) {
     e.preventDefault();
     const url = e.target.closest("[data-share-by-url]").href;
