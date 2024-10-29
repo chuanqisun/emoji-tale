@@ -199,7 +199,7 @@ function fadeoutAudioRecusive(min) {
 
   audio.volume = newVolume;
 
-  if (oldVolume === newVolume) {
+  if (oldVolume === audio.volume) {
     // on iphone or android, audio.volume is controlled by user
     audio.muted = true;
     return;
