@@ -179,6 +179,16 @@ textarea {
     display: block;
     text-decoration: none;
   }
+
+  &:empty {
+    display: none;
+  }
+}
+
+.verse-text {
+  color: orange;
+  font-size: 24px;
+  text-align: center;
 }
 
 .visually-hidden {

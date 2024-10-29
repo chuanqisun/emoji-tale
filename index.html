@@ -22,19 +22,19 @@
       <div id="emoji" class="emoji-grid"></div>
       <textarea id="prompt" placeholder="Add a spooky caption... (optional)"></textarea>
     </li>
+    <div id="share-container"></div>
     <div class="button-group" hidden>
-      <button id="start">START</button>
+      <button id="start">START MY TURN</button>
       <button id="continue" hidden>NEXT PLAYER</button>
       <button id="finish" class="secondary">WRAP UP</button>
+      <button id="reset" class="secondary" hidden>NEW GAME</button>
     </div>
-    <div id="share-container"></div>
-    <button id="reset" hidden>NEW GAME</button>
   </ol>
   <template id="message-template">
     <li class="message-card">
       <h2 class="scene-name"></h2>
       <div data-emoji></div>
-      <p data-text></p>
+      <p class="verse-text" data-text></p>
     </li>
   </template>
   <audio id="sound-track"></audio>

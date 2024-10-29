@@ -9,7 +9,7 @@ import soundtrackUrl from "/alex-productions-freaky-halloween.mp3?url";
 const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
 
 const appName = document.querySelector("h1 a");
-const continueButton = document.querySelector("#continue");
+const handoffButton = document.querySelector("#continue");
 const finishButton = document.querySelector("#finish");
 const newMessageCard = document.querySelector("[data-new-message]");
 const shareContainer = document.querySelector("#share-container");
@@ -25,16 +25,73 @@ audio.src = soundtrackUrl;
 initThread();
 
 document.querySelector("body").addEventListener("click", playAudioOnce);
-
 appName.addEventListener("click", resetGame);
-
 startButton.addEventListener("click", handleStart);
-continueButton.addEventListener("click", startSeed);
+handoffButton.addEventListener("click", handleHandoffGame);
 resetButton.addEventListener("click", resetGame);
-
 shareContainer.addEventListener("click", handleShareByURL);
+finishButton.addEventListener("click", handleFinishGame);
 
-finishButton.addEventListener("click", async () => {
+async function initThread() {
+  const thread = new URLSearchParams(location.search).get("thread");
+  if (thread) {
+    const messages = JSON.parse(await decompressText(thread));
+
+    const items = messages.map((message) => {
+      const cloned = messageTemplate.content.cloneNode(true);
+      cloned.querySelector(".message-card").setAttribute("data-previous-item", "");
+      cloned.querySelector("[data-emoji]").textContent = message.emoji;
+      cloned.querySelector("[data-text]").textContent = message.text.replace(/./g, "*");
+      cloned.querySelector("[data-text]").setAttribute("data-text", message.text);
+
+      return cloned;
+    });
+
+    document.querySelector(".thread").prepend(...items);
+
+    resetButton.removeAttribute("hidden");
+  } else {
+    finishButton.setAttribute("hidden", "");
+  }
+
+  const randomEmojis = getRandomEmojis(4);
+  if (randomEmojis.length) {
+    emojiInput.innerHTML = randomEmojis
+      .map(
+        (emoji, i) =>
+          `<label data-emoji class="emoji-choice"><input type="radio" name="selectedEmoji" class="visually-hidden" value="${emoji}" ${
+            i === 0 ? "checked" : ""
+          } />${emoji}</label>`
+      )
+      .join("");
+  } else {
+    handoffButton.remove();
+    finishButton.classList.remove("secondary");
+    newMessageCard.remove();
+  }
+
+  buttonGroup.removeAttribute("hidden");
+}
+
+function getRandomEmojis(count) {
+  const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
+  const unusedEmojis = emojiList.filter((emoji) => !usedEmojis.has(emoji));
+  const availableEmojis = unusedEmojis.slice(0, count);
+  const shuffledEmojis = availableEmojis.sort(() => Math.random() - 0.5);
+
+  return shuffledEmojis;
+}
+
+function handleStart() {
+  startButton.remove();
+  handoffButton.removeAttribute("hidden");
+  finishButton.removeAttribute("hidden");
+  newMessageCard.removeAttribute("hidden");
+}
+
+async function handleFinishGame() {
+  lockInChoice();
+
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
 
@@ -64,72 +121,17 @@ finishButton.addEventListener("click", async () => {
     }
   );
 
-  resetButton.removeAttribute("hidden");
+  resetButton.classList.remove("secondary");
 
   fadeoutAudio(0.05);
 
   shareContainer.textContent = response.choices[0].message.content;
   synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
-});
-
-async function initThread() {
-  const thread = new URLSearchParams(location.search).get("thread");
-  if (thread) {
-    const messages = JSON.parse(await decompressText(thread));
-    startButton.textContent = "CONTINUE";
-
-    const items = messages.map((message) => {
-      const cloned = messageTemplate.content.cloneNode(true);
-      cloned.querySelector(".message-card").setAttribute("data-previous-item", "");
-      cloned.querySelector("[data-emoji]").textContent = message.emoji;
-      cloned.querySelector("[data-text]").textContent = message.text.replace(/./g, "*");
-      cloned.querySelector("[data-text]").setAttribute("data-text", message.text);
-
-      return cloned;
-    });
-
-    document.querySelector(".thread").prepend(...items);
-  } else {
-    finishButton.setAttribute("hidden", "");
-  }
-
-  const randomEmojis = getRandomEmojis(4);
-  if (randomEmojis.length) {
-    emojiInput.innerHTML = randomEmojis
-      .map(
-        (emoji, i) =>
-          `<label data-emoji class="emoji-choice"><input type="radio" name="selectedEmoji" class="visually-hidden" value="${emoji}" ${
-            i === 0 ? "checked" : ""
-          } />${emoji}</label>`
-      )
-      .join("");
-  } else {
-    continueButton.remove();
-    finishButton.classList.remove("secondary");
-    newMessageCard.remove();
-  }
-
-  buttonGroup.removeAttribute("hidden");
 }
 
-function getRandomEmojis(count) {
-  const usedEmojis = new Set([...document.querySelectorAll("[data-emoji]")].map((emoji) => emoji.textContent.trim()));
-  const unusedEmojis = emojiList.filter((emoji) => !usedEmojis.has(emoji));
-  const availableEmojis = unusedEmojis.slice(0, count);
-  const shuffledEmojis = availableEmojis.sort(() => Math.random() - 0.5);
-
-  return shuffledEmojis;
-}
-
-function handleStart() {
-  startButton.remove();
-  continueButton.removeAttribute("hidden");
-  finishButton.removeAttribute("hidden");
-  newMessageCard.removeAttribute("hidden");
-}
-
-async function startSeed() {
+async function handleHandoffGame() {
   fadeoutAudio(0);
+  lockInChoice();
 
   const thread = getThread();
 
@@ -138,6 +140,9 @@ async function startSeed() {
   appURL.searchParams.set("thread", compressedThread);
 
   shareContainer.innerHTML = `<a href="${appURL.href}" data-share-by-url><qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code></a>`;
+
+  handoffButton.setAttribute("hidden", "");
+  redactTextArea();
 }
 
 function getThread() {
@@ -187,6 +192,19 @@ function fadeoutAudioRecusive(min) {
   if (audio.volume > min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
   }
+}
+
+function lockInChoice() {
+  document.querySelectorAll("[data-new-message] *:where(input, textarea)").forEach((input) => input.setAttribute("disabled", ""));
+}
+
+function redactTextArea() {
+  const replacement = document.createElement("p");
+  replacement.classList.add("verse-text");
+  replacement.textContent = promptInput.value.replace(/./g, "*");
+  replacement.setAttribute("data-text", promptInput.value);
+
+  promptInput.replaceWith(replacement);
 }
 
 function handleShareByURL(e) {
