@@ -106,6 +106,8 @@ async function handleFinishGame() {
   const passcode = await passcodeAsync;
 
   const thread = getThread();
+
+  fadeoutAudio(0.05);
   const response = await getChatResponse(
     passcode,
     "gpt-4o",
@@ -127,8 +129,6 @@ async function handleFinishGame() {
 
   resetButton.classList.remove("secondary");
   resetButton.removeAttribute("hidden");
-
-  fadeoutAudio(0.05);
 
   shareContainer.textContent = response.choices[0].message.content;
   synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
@@ -209,8 +209,6 @@ function fadeoutAudioRecusive(min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
   }
 }
-
-function isMobile() {}
 
 function lockInChoice() {
   document.querySelectorAll("[data-new-message] *:where(input, textarea)").forEach((input) => input.setAttribute("disabled", ""));
