@@ -28,6 +28,8 @@ appName.addEventListener("click", resetGame);
 
 continueButton.addEventListener("click", startSeed);
 
+shareContainer.addEventListener("click", handleShareByURL);
+
 finishButton.addEventListener("click", async () => {
   // reveal the story
   document.querySelectorAll("[data-text]").forEach((hiddenText) => (hiddenText.textContent = hiddenText.getAttribute("data-text")));
@@ -105,7 +107,7 @@ async function startSeed() {
 
   shareContainer.innerHTML = `
   <qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code>
-  <a href="${appURL.href}">Continue with URL</a>
+  <a href="${appURL.href}" data-share-by-url>Share by URL</a>
   `;
 }
 
@@ -149,6 +151,19 @@ function fadeoutAudioRecusive(min) {
   audio.volume = Math.max(min, audio.volume - 0.05);
   if (audio.volume > min) {
     setTimeout(() => fadeoutAudioRecusive(min), 100);
+  }
+}
+
+function handleShareByURL(e) {
+  if (typeof navigator.share === "function" && e.target?.closest("[data-share-by-url]")) {
+    e.preventDefault();
+    const url = e.target.href;
+
+    navigator.share({
+      title: "Poemoji",
+      text: "Let's write a Halloween ghost poem together!",
+      url,
+    });
   }
 }
 
