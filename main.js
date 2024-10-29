@@ -99,6 +99,8 @@ async function initThread() {
 async function startSeed() {
   buttonGroup.remove();
 
+  fadeoutAudio(0);
+
   const thread = getThread();
 
   const compressedThread = await compressText(JSON.stringify(thread));
