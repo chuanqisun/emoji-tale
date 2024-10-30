@@ -127,6 +127,9 @@ async function handleFinishGame() {
     }
   );
 
+  finishButton.classList.add("secondary");
+  finishButton.textContent = "TRY AGAIN";
+  finishButton.removeAttribute("hidden");
   resetButton.classList.remove("secondary");
   resetButton.removeAttribute("hidden");
 
