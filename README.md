@@ -1,3 +1,5 @@
+# Poemoji
+
 This is a one-off Halloween project.
 
 The app lets user "choose your adventure" by picking emojis and adding captions. The users will use QR code to pass the game to the next person.
