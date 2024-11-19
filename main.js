@@ -1,12 +1,9 @@
 import "webcomponent-qr-code";
 import { compressText, decompressText } from "./compression.js";
-import { getSha256 } from "./crypto";
 import { emojiList } from "./emojis.js";
 import { getChatResponse } from "./openai";
 import { synthesizeSpeech } from "./speech";
 import soundtrackUrl from "/alex-productions-freaky-halloween.mp3?url";
-
-const passcodeAsync = getSha256(new URLSearchParams(location.search).get("invite") ?? "");
 
 const appName = document.querySelector("h1 a");
 const handoffButton = document.querySelector("#continue");
@@ -31,6 +28,20 @@ handoffButton.addEventListener("click", handleHandoffGame);
 resetButton.addEventListener("click", resetGame);
 shareContainer.addEventListener("click", handleShareByURL);
 finishButton.addEventListener("click", handleFinishGame);
+
+const llmKey = new URLSearchParams(location.search).get("llmKey");
+const speechRegion = new URLSearchParams(location.search).get("speechRegion");
+const speechKey = new URLSearchParams(location.search).get("speechKey");
+if (!llmKey) console.error("llmKey is missing from URL search parameter");
+if (!speechKey || !speechRegion) console.error("speechRegion or speechKey is missing from the URL search params");
+
+// hide keys and put them in memory
+const mutableUrl = new URL(location.href);
+mutableUrl.searchParams.delete("llmKey");
+mutableUrl.searchParams.delete("speechKey");
+mutableUrl.searchParams.delete("speechRegion");
+
+history.replaceState(null, "", mutableUrl.href);
 
 async function initThread() {
   const thread = new URLSearchParams(location.search).get("thread");
@@ -103,14 +114,11 @@ async function handleFinishGame() {
 
   shareContainer.textContent = "Piecing together the verses...";
 
-  const passcode = await passcodeAsync;
-
   const thread = getThread();
 
   fadeoutAudio(0.05);
   const response = await getChatResponse(
-    passcode,
-    "gpt-4o",
+    llmKey,
     [
       {
         role: "system",
@@ -134,7 +142,7 @@ async function handleFinishGame() {
   resetButton.removeAttribute("hidden");
 
   shareContainer.textContent = response.choices[0].message.content;
-  synthesizeSpeech(passcode, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
+  synthesizeSpeech(speechRegion, speechKey, response.choices[0].message.content ?? "I'm sorry, I have encountered an error. Trick or treat!");
 }
 
 async function handleHandoffGame() {
@@ -146,6 +154,9 @@ async function handleHandoffGame() {
   const compressedThread = await compressText(JSON.stringify(thread));
   const appURL = new URL(location.href);
   appURL.searchParams.set("thread", compressedThread);
+  appURL.searchParams.set("llmKey", llmKey);
+  appURL.searchParams.set("speechKey", speechKey);
+  appURL.searchParams.set("speechRegion", speechRegion);
 
   shareContainer.innerHTML = `<a href="${appURL.href}" data-share-by-url><qr-code format="svg" modulesize="4" data="${appURL.href}"></qr-code></a>`;
 

@@ -6,4 +6,10 @@ The app lets user "choose your adventure" by picking emojis and adding captions.
 
 In the end, LLM will generate a poem based on users choices.
 
-Due to the cost of hosing LLMs, the poem generator feature is disabled from the backend. You will need to self-host a LLM for this to work.
+## Get started
+
+The initial player needs to use the following URL to setup authentication with OpenAI and Azure Speech
+
+```
+https://chuanqisun.github.io/poemoji/?speechRegion=******&speechKey=***********&llmKey=************
+```

@@ -44,35 +44,23 @@ export type OpenAIChatResponse = {
   };
 };
 
-export async function getChatResponse(
-  passcode: string,
-  deploymentName: string,
-  messages: ChatMessage[],
-  config?: Partial<OpenAIChatPayload>
-): Promise<OpenAIChatResponse> {
+export async function getChatResponse(apiKey: string, messages: ChatMessage[], config?: Partial<OpenAIChatPayload>): Promise<OpenAIChatResponse> {
   const payload = {
     messages,
+    model: "gpt-4o",
     temperature: 0.7,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 60,
-    stop: "",
     ...config,
   };
 
   try {
-    const result: OpenAIChatResponse = await fetch(
-      `https://proto-api.azure-api.net/halloween/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`,
-      {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-          "x-secret-ingredient": passcode,
-        },
-        body: JSON.stringify(payload),
-      }
-    ).then((res) => res.json());
+    const result: OpenAIChatResponse = await fetch(`https://api.openai.com/v1/chat/completions`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    }).then((res) => res.json());
 
     console.log({
       title: `Chat ${result.usage.total_tokens} tokens`,
@@ -115,74 +103,4 @@ export interface ChatStreamItem {
     finish_reason: "stop" | "length" | "content_filter" | null;
   }[];
   usage: null;
-}
-
-export async function* getChatStream(
-  passcode: string,
-  deploymentName: string,
-  messages: ChatMessage[],
-  config?: Partial<OpenAIChatPayload>,
-  abortSignal?: AbortSignal
-): AsyncGenerator<ChatStreamItem> {
-  const payload = {
-    messages,
-    temperature: 0.7,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 60,
-    stop: "",
-    ...config,
-  };
-
-  const stream = await fetch(`https://proto-api.azure-api.net/halloween/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`, {
-    method: "post",
-    headers: {
-      "Content-Type": "application/json",
-      "x-secret-ingredient": passcode,
-    },
-    body: JSON.stringify({ ...payload, stream: true }),
-    signal: abortSignal,
-  }).catch((e) => {
-    console.error(e);
-    throw e;
-  });
-
-  if (!stream.ok) {
-    throw new Error(`Request failed: ${[stream.status, stream.statusText, await stream.text()].join(" ")}`);
-  }
-
-  if (!stream.body) throw new Error("Request failed");
-
-  const reader = stream.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-
-  let unfinishedLine = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    // Massage and parse the chunk of data
-    const chunk = decoder.decode(value);
-
-    // because the packets can split anywhere, we only process whole lines
-    const currentWindow = unfinishedLine + chunk;
-    unfinishedLine = currentWindow.slice(currentWindow.lastIndexOf("\n") + 1);
-
-    const wholeLines = currentWindow
-      .slice(0, currentWindow.lastIndexOf("\n") + 1)
-      .split("\n")
-      .filter(Boolean);
-
-    const matches = wholeLines.map((wholeLine) => [...wholeLine.matchAll(/^data: (\{.*\})$/g)][0]?.[1]).filter(Boolean);
-
-    for (const match of matches) {
-      const item = JSON.parse(match);
-      if ((item as any)?.error?.message) throw new Error((item as any).error.message);
-      if (!Array.isArray(item?.choices)) throw new Error("Invalid response");
-      yield item;
-    }
-  }
 }

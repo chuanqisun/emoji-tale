@@ -1,20 +1,10 @@
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import { Observable, Subject } from "rxjs";
 
-let cachedToken: string | null = null;
-
-export async function synthesizeSpeech(passcode: string, content: string) {
+export async function synthesizeSpeech(speechRegion: string, speechKey: string, content: string) {
   console.log(`speak > ${content}`);
-  if (!cachedToken) {
-    cachedToken = await fetch(`https://proto-api.azure-api.net/halloween/issuetoken`, {
-      method: "POST",
-      headers: {
-        "x-secret-ingredient": passcode,
-      },
-    }).then((res) => res.text());
-  }
 
-  const speechConfig = sdk.SpeechConfig.fromAuthorizationToken(cachedToken!, "westus");
+  const speechConfig = sdk.SpeechConfig.fromSubscription(speechKey, speechRegion);
   const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
 
   const speechSynthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
