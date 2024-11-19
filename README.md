@@ -12,4 +12,9 @@ The initial player needs to use the following URL to setup authentication with O
 
 ```
 https://chuanqisun.github.io/poemoji/?speechRegion=******&speechKey=***********&llmKey=************
+
 ```
+
+- `speechRegion` is the region for Azure Speech service, e.g. `eastus`, `westus`, etc.
+- `speechKey` is the key for Azure Speech service
+- `llmKey` is the key for OpenAI Chat Completion API
