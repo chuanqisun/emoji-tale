@@ -77,6 +77,21 @@ qr-code::part(svg) {
   border-radius: 16px;
 }
 
+.authentication-notice {
+  display: none;
+  color: orange;
+
+  a {
+    color: inherit;
+  }
+}
+
+.unauthenticated {
+  .authentication-notice {
+    display: block;
+  }
+}
+
 .button-group {
   display: grid;
   grid-auto-columns: 1fr;

@@ -35,6 +35,8 @@ const speechKey = new URLSearchParams(location.search).get("speechKey");
 if (!llmKey) console.error("llmKey is missing from URL search parameter");
 if (!speechKey || !speechRegion) console.error("speechRegion or speechKey is missing from the URL search params");
 
+if (!llmKey || !speechKey || !speechRegion) document.body.classList.add("unauthenticated");
+
 // hide keys and put them in memory
 const mutableUrl = new URL(location.href);
 mutableUrl.searchParams.delete("llmKey");
